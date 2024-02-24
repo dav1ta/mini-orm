@@ -1,6 +1,7 @@
 import fields
 from orm import Model
 
+
 class People(Model):
     name = fields.Char()
     age = fields.Int()
@@ -22,11 +23,19 @@ person2 = People(name="Alice", age=25, is_student=True, bio="I am also a student
 course1 = Course(name="Mathematics")
 course2 = Course(name="Physics")
 
+
 # Saving instances
 person1.save()
 person2.save()
 course1.save()
 course2.save()
+
+
+print(person1.name)
+person1.name="Daviti"
+person1.save()
+print(person1.name)
+
 
 # Create instances of Enrollment
 enrollment1 = Enrollment(student=person1.id, course=course1.id)
@@ -37,14 +46,8 @@ enrollment1.save()
 enrollment2.save()
 enrollment3.save()
 
-# # Retrieving related courses for a person
-# person1_courses = [enrollment.course for enrollment in Enrollment._instances if enrollment.student == person1]
-# print(f"{person1.name}'s courses: {[course.name for course in person1_courses]}")
 
-# # Retrieving enrolled people in a course
-# course1_people = [enrollment.student for enrollment in Enrollment._instances if enrollment.course == course1]
-# print(f"People enrolled in {course1.name}: {[person.name for person in course1_people]}")
 print(course1.enrolled_students)
 
-# a = Course.search([('name', '=', 'Mathematics')])
-# print(a,"gg")
+search_course = Course.search([('name', '=', 'Mathematics')])
+print(search_course)

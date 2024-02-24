@@ -38,10 +38,12 @@ def execute_insert_query(query):
 class ModelMeta(type):
     def __new__(cls, name, bases, dct):
         fields = {k: v for k, v in dct.items() if isinstance(v, Field)}
-        fields['id'] = Int()
+        id_field = Int()
+        # hardcoded id as integer field , add in instance
+        fields['id'] = id_field  
         dct["_fields"] = fields
-        print(fields)
         dct["_instances"] = []
+        dct['id'] = id_field
         table_name = dct.get("_name", name.lower())
         dct["_name"] = table_name.replace(".", "_")
         new_class = super().__new__(cls, name, bases, dct)
@@ -54,7 +56,6 @@ class ModelMeta(type):
 class Model(metaclass=ModelMeta):
 
     _classes= {}
-    # id = Int()
 
     def __init__(self, *args, **kwargs):
         for field, value in zip(self._fields.keys(), args):
@@ -67,7 +68,7 @@ class Model(metaclass=ModelMeta):
         self._classes[self.__class__._name.lower()] = self.__class__
 
     def save(self):
-        filtered_fields = {k: v for k, v in self._fields.items() if not v.lazy}
+        filtered_fields = {k: v for k, v in self._fields.items() if not v.lazy and k != "id"}
         field_names = ", ".join(filtered_fields.keys())
         values = ", ".join(repr(getattr(self, f)) for f in filtered_fields.keys())
         if self.id:
@@ -84,6 +85,7 @@ class Model(metaclass=ModelMeta):
 
     @classmethod
     def create_table_if_not_exists(cls):
+        # hardcoded id as integer field , add in instance
         id_query = "id INTEGER PRIMARY KEY AUTOINCREMENT, "
         query = f'CREATE TABLE IF NOT EXISTS {cls._name} ({id_query +", ".join(f"{field_name} {field.sql_type()}" for field_name, field in cls._fields.items() if field_name!="id")});'
         print(query)
